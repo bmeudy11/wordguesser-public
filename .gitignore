@@ -2,3 +2,9 @@ coverage
 .bundle/
 TAGS
 *.swp
+
+vendor/bundle/ruby/3.3.0/bin/*
+vendor/bundle/ruby/3.3.0/cache/*
+vendor/bundle/ruby/3.3.0/extensions/*
+vendor/bundle/ruby/3.3.0/gems/*
+vendor/bundle/ruby/3.3.0/specifications/*
