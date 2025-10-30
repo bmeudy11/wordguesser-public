@@ -52,5 +52,5 @@ jobs:
           docker run --rm
             -e RACK_ENV=test -e RAILS_ENV=test \
             -v ${{ github.workspace }}:/app \
-            wordguesser-ci:latest \
+            ghcr.io/${{ github.repository }}/wordguesser-ci:${{ github.sha }} \
             bash -lc "bundle exec cucumber"
