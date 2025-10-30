@@ -1,4 +1,4 @@
-Part 1    [Part 2](part2.md)
+Part 1    [Part 2](part2.md)    [Part 3](part3.md)
 
 Wordguesser
 =============================================================
