@@ -17,3 +17,16 @@ jobs:
           file: ./Dockerfile
           tags: wordguesser-ci:latest
           load: true
+  rspec:
+    name: RSpec Tests
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run RSpec inside Docker
+        run: |
+          docker run --rm \
+            -e RACK_ENV=test -e RAILS_ENV=test \
+            -v "${{ github.workspace }}":/app \
+            wordguesser-ci:latest \
+            bash -lc "bundle exec rspec"
