@@ -1,0 +1,22 @@
+AllCops:
+  NewCops: enable
+  Include:
+    - "lib/wordguesser_game.rb"
+  Exclude:
+    - "db/**/*"
+    - "vendor/**/*"
+    - "node_modules/**/*"
+
+Layout/LineLength:
+  Max: 120
+
+# Disable some style rules to reduce noise
+Style/StringLiterals:
+  Enabled: false
+Style/Documentation:
+  Enabled: false
+Style/FrozenStringLiteralComment:
+  Enabled: false
+
+Metrics/MethodLength:
+  Max: 5
