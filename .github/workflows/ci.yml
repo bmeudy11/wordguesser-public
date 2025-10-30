@@ -5,11 +5,15 @@ on:
     branches: [ "main" ]
 
 jobs:
-  hello:
+  build:
+    name: Build Docker image
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Say hello
-        run: echo "GitHub Actions is working!"
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./Dockerfile
+          tags: wordguesser-ci:latest
+          load: true
