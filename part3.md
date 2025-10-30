@@ -106,7 +106,7 @@ jobs:
 ## Step 4 — Run RSpec in CI (inside the container)
 
 **Append a new job:**
-````yaml
+```yaml
   rspec:
     name: RSpec Tests
     needs: build
@@ -115,8 +115,12 @@ jobs:
       - uses: actions/checkout@v4
       - name: Run RSpec inside Docker
         run: |
-          docker run --rm             -e RACK_ENV=test -e RAILS_ENV=test             -v ${{ github.workspace }}:/app             wordguesser-ci:latest             bash -lc "bundle exec rspec"
-````
+          docker run --rm
+            -e RACK_ENV=test -e RAILS_ENV=test \
+            -v ${{ github.workspace }}:/app \
+            wordguesser-ci:latest \
+            bash -lc "bundle exec rspec"
+```
 
 **Why:** This reproduces your Part 2 step (`docker compose run --rm app bash -lc "bundle exec rspec"`).
 
@@ -127,7 +131,7 @@ jobs:
 ## Step 5 — Add Cucumber tests
 
 **Append another job:**
-````yaml
+```yaml
   cucumber:
     name: Cucumber Tests
     needs: build
@@ -136,8 +140,12 @@ jobs:
       - uses: actions/checkout@v4
       - name: Run Cucumber inside Docker
         run: |
-          docker run --rm             -e RACK_ENV=test -e RAILS_ENV=test             -v ${{ github.workspace }}:/app             wordguesser-ci:latest             bash -lc "bundle exec cucumber"
-````
+          docker run --rm
+            -e RACK_ENV=test -e RAILS_ENV=test \
+            -v ${{ github.workspace }}:/app \
+            wordguesser-ci:latest \
+            bash -lc "bundle exec cucumber"
+```
 
 **Why:** Separate jobs for RSpec and Cucumber let you see which test suite failed faster and more clearly.
 
