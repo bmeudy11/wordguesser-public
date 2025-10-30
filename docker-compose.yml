@@ -6,7 +6,7 @@ services:
       context: .
       dockerfile: Dockerfile
 
-    image: wordguesser-ci:dev
+    image: wordguesser:dev
 
     ports:
       - "9292:9292"
