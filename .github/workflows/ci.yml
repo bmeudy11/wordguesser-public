@@ -5,8 +5,8 @@ on:
     branches: [ "main" ]
 
 jobs:
-  build:
-    name: Build Docker image
+  test:
+    name: Build and Test
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -17,12 +17,6 @@ jobs:
           file: ./Dockerfile
           tags: wordguesser-ci:latest
           load: true
-  rspec:
-    name: RSpec Tests
-    needs: build
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
       - name: Run RSpec inside Docker
         run: |
           docker run --rm \
