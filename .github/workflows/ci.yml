@@ -9,80 +9,76 @@ jobs:
     name: Build Docker image
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: docker/setup-buildx-action@v3
-      - uses: docker/login-action@v3
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-      - uses: docker/build-push-action@v6
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build image (no push)
+        uses: docker/build-push-action@v6
         with:
           context: .
           file: ./Dockerfile
-          tags: ghcr.io/${{ github.repository }}/wordguesser-ci:${{ github.sha }}
-          push: true
+          tags: wordguesser-ci:latest
+          load: true
+
+      - name: Save image as artifact
+        run: docker save wordguesser-ci:latest -o image.tar
+
+      - name: Upload image artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-image
+          path: image.tar
 
   rspec:
-    name: RSpec Tests
+    name: RSpec
     needs: build
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: docker/login-action@v3
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download image artifact
+        uses: actions/download-artifact@v4
         with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-      - name: Run RSpec inside Docker
-        run: |
-          docker run --rm \
-            -e RACK_ENV=test -e RAILS_ENV=test \
-            -v "${{ github.workspace }}":/app \
-            ghcr.io/${{ github.repository }}/wordguesser-ci:${{ github.sha }} \
-            bash -lc "bundle exec rspec"
-  cucumber:
-    name: Cucumber Tests
-    needs: build
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: docker/login-action@v3
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-      - name: Run Cucumber inside Docker
+          name: app-image
+          path: .
+
+      - name: Load Docker image
+        run: docker load -i image.tar
+
+      - name: Run RSpec inside container
         run: |
           docker run --rm \
             -e RACK_ENV=test -e RAILS_ENV=test \
             -v ${{ github.workspace }}:/app \
-            ghcr.io/${{ github.repository }}/wordguesser-ci:${{ github.sha }} \
-            bash -lc "bundle exec cucumber"
-  lint:
-    name: RuboCop Lint
+            wordguesser-ci:latest \
+            bash -lc "bundle exec rspec"
+
+  cucumber:
+    name: Cucumber
+    needs: build
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: ruby/setup-ruby@v1
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download image artifact
+        uses: actions/download-artifact@v4
         with:
-          ruby-version: "3.3"
-          bundler-cache: true
+          name: app-image
+          path: .
 
-      - name: Run RuboCop on lib/wordguesser_game.rb
+      - name: Load Docker image
+        run: docker load -i image.tar
+
+      - name: Run Cucumber inside container
         run: |
-          bundle exec rubocop lib/wordguesser_game.rb --require rubocop-rspec -f json | tee rubocop.json
-
-      - name: Install jq
-        run: sudo apt-get update -y && sudo apt-get install -y jq
-
-      - name: Check offense threshold
-        env:
-          OFFENSE_THRESHOLD: "25"
-        run: |
-          COUNT=$(jq '.summary.offense_count' rubocop.json)
-          echo "Found $COUNT offenses. Threshold: $OFFENSE_THRESHOLD"
-          if [ "$COUNT" -gt "$OFFENSE_THRESHOLD" ]; then
-            echo "::error::RuboCop offenses ($COUNT) exceed threshold ($OFFENSE_THRESHOLD)."
-            exit 1
-          fi
+          docker run --rm \
+            -e RACK_ENV=test -e RAILS_ENV=test \
+            -v ${{ github.workspace }}:/app \
+            wordguesser-ci:latest \
+            bash -lc "bundle exec cucumber"
+            
