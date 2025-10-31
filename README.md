@@ -156,3 +156,6 @@ In **[Part 2](part2.md)**, you will:
 - (Optional) Push the image to a container registry
 
 Before moving on, make sure all tests pass and the app runs cleanly on your local system.
+
+
+**[Part 3!!!](part3.md)** completed with new CI/CD workflow!
