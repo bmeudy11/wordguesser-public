@@ -1,0 +1,71 @@
+name: Brakeman (Security-Focused Static Code Analysis)
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  brakeman-scan:
+    name: Run Brakeman
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          # Match the Ruby version in the project's Gemfile (~> 3.3.8)
+          ruby-version: 3.3.8
+          bundler-cache: true
+
+      - name: Show Ruby and Bundler versions (debug)
+        run: |
+          ruby --version
+          gem --version
+          bundle --version || true
+
+      - name: Disable Bundler frozen mode (allow Gemfile.lock updates)
+        run: |
+          # Allow CI to update Gemfile.lock when new dependencies are added
+          bundle config set --local frozen false || true
+
+      - name: Install Brakeman
+        run: |
+          gem install brakeman
+
+      - name: Install bundle dependencies
+        run: |
+          bundle install --jobs 4 --retry 3
+
+      - name: Run Brakeman (JSON + SARIF)
+        run: |
+          # Produce JSON output for artifacts
+          bundle exec brakeman -f json -o brakeman.json || true
+          # Attempt SARIF output if Brakeman supports it (some versions do)
+          bundle exec brakeman -f sarif -o brakeman.sarif || true
+
+      - name: Upload Brakeman results (artifact)
+        uses: actions/upload-artifact@v4
+        with:
+          name: brakeman-results
+          path: |
+            brakeman.json
+            brakeman.sarif
+
+      - name: Upload SARIF to GitHub (if present)
+        if: ${{ always() && (hashFiles('**/brakeman.sarif') != '') }}
+        uses: github/codeql-action/upload-sarif@v4
+        with:
+          sarif_file: brakeman.sarif
+
+      - name: (Optional) Fail on warnings
+        if: false
+        run: |
+          # Uncomment and adjust if you want the job to fail on a threshold
+          # Example: fail if any warnings are present
+          # if [ -s brakeman.json ]; then exit 1; fi
+          echo "Skipping strict failure by default"
