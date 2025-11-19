@@ -19,14 +19,20 @@ jobs:
       - name: Run Hadolint (produce JSON report)
         # Use the official hadolint image to run the linter and write JSON output
         run: |
-          docker run --rm -v "${{ github.workspace }}":/work -w /work hadolint/hadolint:latest hadolint -f json Dockerfile > hadolint-report.json
+          # Run hadolint and capture JSON output even if the linter exits non-zero.
+          # Write stdout (JSON) to hadolint-report.json and stderr to hadolint-stderr.log
+          docker run --rm -v "${{ github.workspace }}":/work -w /work hadolint/hadolint:latest hadolint -f json Dockerfile > hadolint-report.json 2> hadolint-stderr.log || true
+          echo "hadolint exit status: $?" > hadolint-exitcode.txt || true
 
       - name: Upload Hadolint report
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: hadolint-report
-          path: hadolint-report.json
+          path: |
+            hadolint-report.json
+            hadolint-stderr.log
+            hadolint-exitcode.txt
 
       - name: (Optional) Fail on Hadolint issues
         if: false
