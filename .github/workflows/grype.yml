@@ -1,4 +1,4 @@
-name: Grype vulnerability scan
+name: Grype vulnerability scan (Container Image Vulnerability Scanning)
 
 on:
   push:

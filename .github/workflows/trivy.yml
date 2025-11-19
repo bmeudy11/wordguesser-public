@@ -1,4 +1,4 @@
-name: Trivy Security Scan
+name: Trivy Security Scan (Dependency Vulnerability Scanning)
 
 on:
   pull_request:
