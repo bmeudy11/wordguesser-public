@@ -1,0 +1,45 @@
+name: RuboCop (Security-Focused Static Code Analysis)
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  rubocop-scan:
+    name: RuboCop security analysis
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: 3.0
+          bundler-cache: true
+
+      - name: Install RuboCop security gem
+        run: |
+          gem install rubocop-security
+
+      - name: Run RuboCop with security focus
+        run: |
+          rubocop --require rubocop-security --format json --out rubocop.json || true
+          rubocop --require rubocop-security --format progress
+
+      - name: Upload RuboCop results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: rubocop-results
+          path: rubocop.json
+
+      - name: Comment PR with RuboCop results (optional)
+        if: github.event_name == 'pull_request'
+        run: |
+          # Parse JSON and comment on PR with results (requires additional setup)
+          # For now, results are available in artifacts
+          echo "RuboCop results saved to artifacts"
