@@ -6,6 +6,8 @@ GEM
     ast (2.4.3)
     base64 (0.3.0)
     bigdecimal (3.3.1)
+    brakeman (7.1.1)
+      racc
     builder (3.3.0)
     byebug (12.0.0)
     capybara (3.40.0)
@@ -233,6 +235,7 @@ PLATFORMS
   x86_64-linux-musl
 
 DEPENDENCIES
+  brakeman
   byebug (~> 12.0)
   capybara (~> 3.40)
   cucumber (~> 10.0)
