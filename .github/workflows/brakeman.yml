@@ -40,9 +40,10 @@ jobs:
       - name: Run Brakeman (JSON + SARIF)
         run: |
           # Produce JSON output for artifacts
-          bundle exec brakeman -f json -o brakeman.json || true
+          # Use --force to scan non-Rails Ruby apps (this is a Sinatra app)
+          bundle exec brakeman --force -f json -o brakeman.json || true
           # Attempt SARIF output if Brakeman supports it (some versions do)
-          bundle exec brakeman -f sarif -o brakeman.sarif || true
+          bundle exec brakeman --force -f sarif -o brakeman.sarif || true
 
       - name: Upload Brakeman results (artifact)
         uses: actions/upload-artifact@v4
