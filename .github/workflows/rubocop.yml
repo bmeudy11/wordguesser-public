@@ -28,11 +28,6 @@ jobs:
           gem --version
           bundle --version || true
 
-      - name: Install RuboCop security gem
-        run: |
-          # Install rubocop-security globally so it can be required by rubocop
-          gem install rubocop-security
-
       - name: Ensure bundle dependencies
         run: |
           # Explicit install to make sure development/test gems (like rubocop) are present
