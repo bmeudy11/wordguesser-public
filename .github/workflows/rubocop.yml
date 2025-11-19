@@ -18,17 +18,31 @@ jobs:
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: 3.0
+          # Match the Ruby version in the project's Gemfile (~> 3.3.8)
+          ruby-version: 3.3.8
           bundler-cache: true
+
+      - name: Show Ruby and Bundler versions (debug)
+        run: |
+          ruby --version
+          gem --version
+          bundle --version || true
 
       - name: Install RuboCop security gem
         run: |
+          # Install rubocop-security globally so it can be required by rubocop
           gem install rubocop-security
+
+      - name: Ensure bundle dependencies
+        run: |
+          # Explicit install to make sure development/test gems (like rubocop) are present
+          bundle install --jobs 4 --retry 3
 
       - name: Run RuboCop with security focus
         run: |
-          rubocop --require rubocop-security --format json --out rubocop.json || true
-          rubocop --require rubocop-security --format progress
+          # Use bundle exec when possible so project Gemfile gems are used
+          bundle exec rubocop --require rubocop-security --format json --out rubocop.json || true
+          bundle exec rubocop --require rubocop-security --format progress || true
 
       - name: Upload RuboCop results
         if: always()
