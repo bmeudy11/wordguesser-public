@@ -26,6 +26,4 @@ group :development, :test do
 
   gem "rubocop", require: false
   gem "rubocop-rspec", require: false
-  # rubocop-security is not published to RubyGems; pull from GitHub for reproducible CI installs
-  gem 'rubocop-security', git: 'https://github.com/rubocop/rubocop-security.git', require: false
 end
