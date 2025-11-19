@@ -28,6 +28,11 @@ jobs:
           gem --version
           bundle --version || true
 
+      - name: Disable Bundler frozen mode (allow Gemfile.lock updates)
+        run: |
+          # Allow CI to update Gemfile.lock when new dependencies are added
+          bundle config set --local frozen false || true
+
       - name: Ensure bundle dependencies
         run: |
           # Explicit install to make sure development/test gems (like rubocop) are present
