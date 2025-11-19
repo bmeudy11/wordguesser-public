@@ -1,0 +1,37 @@
+name: Hadolint (Dockerfile Security & Best-Practice Linting)
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch: {}
+
+jobs:
+  hadolint:
+    name: Hadolint (lint Dockerfile)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Run Hadolint (produce JSON report)
+        # Use the official hadolint image to run the linter and write JSON output
+        run: |
+          docker run --rm -v "${{ github.workspace }}":/work -w /work hadolint/hadolint:latest hadolint -f json Dockerfile > hadolint-report.json
+
+      - name: Upload Hadolint report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: hadolint-report
+          path: hadolint-report.json
+
+      - name: (Optional) Fail on Hadolint issues
+        if: false
+        run: |
+          # If you'd like the job to fail when hadolint reports issues, enable this step
+          if [ -s hadolint-report.json ]; then
+            echo "Hadolint reported issues"; exit 1
+          fi
