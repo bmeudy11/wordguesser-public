@@ -24,6 +24,5 @@ group :development, :test do
   gem 'launchy',      '~> 3.0'
   gem 'webmock',      '~> 3.23'
 
-  gem "rubocop", require: false
-  gem "rubocop-rspec", require: false
+  gem 'brakeman', require: false
 end

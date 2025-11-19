@@ -1,0 +1,45 @@
+name: Syft (SBOM Generation)
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch: {}
+
+jobs:
+  syft-sbom:
+    name: Generate SBOM with Syft
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install Syft
+        run: |
+          # Install the official Syft binary
+          curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh | sh -s -- -b /usr/local/bin
+
+      - name: Generate Syft SBOM (native JSON)
+        run: |
+          # Generate the Syft native JSON SBOM from the repository filesystem
+          syft dir:. -o json > sbom.syft.json || true
+
+      - name: Show SBOM summary (short)
+        run: |
+          echo "Syft JSON SBOM size:" && wc -c sbom.syft.json || true
+
+      - name: Upload SBOM artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: sbom-artifact
+          path: sbom.syft.json
+
+      - name: (Optional) Fail if no packages found
+        if: false
+        run: |
+          # Exit with non-zero if syft finds no packages (adjust as needed)
+          if [ ! -s sbom.syft.json ]; then
+            echo "No SBOM generated, failing job"; exit 1
+          fi

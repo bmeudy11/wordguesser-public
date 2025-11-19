@@ -1,0 +1,45 @@
+name: Grype vulnerability scan (Container Image Vulnerability Scanning)
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  grype-scan:
+    name: Build image and scan with Grype
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Docker image
+        run: |
+          docker build -t wordguesser:${{ github.sha }} .
+
+      - name: Install Grype
+        run: |
+          # Install the official Grype binary
+          curl -sSfL https://raw.githubusercontent.com/anchore/grype/main/install.sh | sh -s -- -b /usr/local/bin
+
+      - name: Run Grype and produce SARIF
+        run: |
+          # Scan the built image and write SARIF output so GitHub can display results
+          grype docker:wordguesser:${{ github.sha }} -o sarif > grype.sarif || true
+
+      - name: Upload SARIF to GitHub
+        uses: github/codeql-action/upload-sarif@v4
+        with:
+          sarif_file: grype.sarif
+
+      - name: Fail on high severity (optional)
+        if: false
+        run: |
+          # Example of failing the job if high severity vulnerabilities exist.
+          # Uncomment and adjust as desired.
+          grype docker:wordguesser:${{ github.sha }} --fail-on high
